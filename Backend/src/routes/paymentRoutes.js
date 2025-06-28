@@ -14,6 +14,6 @@ router.post('/payments/confirm', paymentController.confirmPayment);
 router.get('/payments/:id', paymentController.getPaymentDetails);
 
 // Route to list all payments
-router.get('/payments', paymentController.listPayments);
+// router.get('/payments', paymentController.listPayments);
 
 module.exports = router;

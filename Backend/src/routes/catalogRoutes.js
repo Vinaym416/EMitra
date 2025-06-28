@@ -8,10 +8,10 @@ const catalogController = new CatalogController();
 router.post('/', catalogController.createCatalogItem);
 
 // Route to get all catalog items
-router.get('/', catalogController.getAllCatalogItems);
+// router.get('/', catalogController.getAllCatalogItems);
 
-// Route to get a specific catalog item by ID
-router.get('/:id', catalogController.getCatalogItemById);
+// // Route to get a specific catalog item by ID
+// router.get('/:id', catalogController.getCatalogItemById);
 
 // Route to update a catalog item by ID
 router.put('/:id', catalogController.updateCatalogItem);

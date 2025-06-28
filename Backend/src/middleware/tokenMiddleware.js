@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const config = require('../config/config');
+const config = require('../config/config'); // Adjust the path as necessary
 
 const tokenMiddleware = (req, res, next) => {
     const token = req.headers['authorization'];

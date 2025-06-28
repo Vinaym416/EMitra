@@ -1,15 +1,16 @@
+import React from "react";
 import { Navigate } from "react-router-dom";
 import Login from "../pages/Users/Login";
 import Signup from "../pages/Users/Signup";
-import Orders from "../pages/Users/Orders";
-import Checkout from "../pages/Payments/Checkout";
-import OrderSummary from "../pages/Payments/OrderSummary";
-import Payment from "../pages/Payments/Payment";
-import PaymentSuccess from "../pages/Payments/PaymentSuccess";
-import ProductList from "../pages/Catalogs/ProductList";
-import ProductDetails from "../pages/Catalogs/ProductDetails";
-import ProductCard from "../pages/Catalogs/ProductCard";
-import CategoryFilter from "../pages/Catalogs/CategoryFilter";
+// import Orders from "../pages/Users/Orders";
+// import Checkout from "../pages/Payments/Checkout";
+// import OrderSummary from "../pages/Payments/OrderSummary";
+// import Payment from "../pages/Payments/Payment";
+// import PaymentSuccess from "../pages/Payments/PaymentSuccess";
+// import ProductList from "../pages/Catalogs/ProductList";
+// import ProductDetails from "../pages/Catalogs/ProductDetails";
+// import ProductCard from "../pages/Catalogs/ProductCard";
+// import CategoryFilter from "../pages/Catalogs/CategoryFilter";
 
 const appRoutes = [
 

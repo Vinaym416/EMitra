@@ -8,7 +8,7 @@ const notificationController = new NotificationController();
 router.post('/send', notificationController.sendNotification);
 
 // Route to get notifications for a user
-router.get('/:userId', notificationController.getUserNotifications);
+// router.get('/:userId', notificationController.getUserNotifications);
 
 // Route to delete a notification
 router.delete('/:notificationId', notificationController.deleteNotification);

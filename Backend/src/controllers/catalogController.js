@@ -47,4 +47,4 @@ class CatalogController {
     }
 }
 
-export default CatalogController;
+module.exports = CatalogController;

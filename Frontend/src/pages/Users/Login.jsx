@@ -1,4 +1,5 @@
 import { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { axiosInstance } from "../../lib/axios.js";
 import toast from "react-hot-toast";
@@ -23,8 +24,9 @@ export default function Login() {
     }
 
     try {
+      // The backend expects "phonenumber" for phone login, not "phone"
       const payload = isPhone
-        ? { phone: phoneOrEmail, password }
+        ? { phonenumber: phoneOrEmail, password }
         : { email: phoneOrEmail, password };
 
       const res = await axiosInstance.post("/auth/login", payload);

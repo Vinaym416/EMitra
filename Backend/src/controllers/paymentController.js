@@ -12,4 +12,4 @@ class PaymentController {
     }
 }
 
-export default new PaymentController();
+module.exports = PaymentController;
