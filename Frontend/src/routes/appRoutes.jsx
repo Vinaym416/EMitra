@@ -17,7 +17,7 @@ const appRoutes = [
   { path: "/signup", element: <Signup /> },
   { path: "/checkout", element: <Checkout /> },
   { path: "/products", element: <ProductList /> },
-  { path: "/product/:id", element: <ProductDetails /> },
+  { path: "/products/:id", element: <ProductDetails /> },
 
   { path: "/payment", element: <Payment /> },
 
