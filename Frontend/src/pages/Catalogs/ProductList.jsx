@@ -26,6 +26,8 @@ export default function ProductList() {
   const [cart, setCartState] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [justAddedId, setJustAddedId] = useState(null); 
+  const [showGoToCart, setShowGoToCart] = useState(false);
   const navigate = useNavigate();
   const { authUser } = useAuth();
 
@@ -49,14 +51,31 @@ export default function ProductList() {
   // Add to cart handler
   const handleAddToCart = (product) => {
     if (!authUser) {
-      toast.error("Please login to add items to cart.");
+      toast.error("Please login to add items to cart.", {
+        style: {
+          fontSize: "0.85rem",
+          minWidth: "160px",
+          maxWidth: "90vw",
+          padding: "0.5rem 1rem",
+          borderRadius: "0.5rem",
+        },
+      });
       navigate("/login");
       return;
     }
     let cartItems = getCart();
     const existing = cartItems.find((item) => item.id === product._id);
     if (existing) {
-      toast("Already added to cart!", { icon: "🛒" });
+      toast("Already added to cart!", {
+        icon: "🛒",
+        style: {
+          fontSize: "0.85rem",
+          minWidth: "160px",
+          maxWidth: "90vw",
+          padding: "0.5rem 1rem",
+          borderRadius: "0.5rem",
+        },
+      });
       return;
     }
     cartItems.push({
@@ -69,20 +88,50 @@ export default function ProductList() {
     });
     setCart(cartItems);
     setCartState(cartItems);
-    toast.success(`${product.name} added to cart!`);
+    setJustAddedId(product._id); 
+    setShowGoToCart(true); 
+    toast.success(` added `, {
+      style: {
+      fontSize: "0.7rem",
+          minWidth: "100px",
+          maxWidth: "70vw",
+          padding: "0.2rem 0.5rem",
+          borderRadius: "0.3rem",
+        },
+    });
+   
+    setTimeout(() => setJustAddedId(null), 3000);
+    setTimeout(() => setShowGoToCart(false), 5000);
   };
 
   // Remove from cart handler
   const handleRemoveFromCart = (product) => {
     if (!authUser) {
-      toast.error("Please login first.");
+      toast.error("Please login first.", {
+        style: {
+          fontSize: "0.7rem",
+          minWidth: "100px",
+          maxWidth: "70vw",
+          padding: "0.2rem 0.5rem",
+          borderRadius: "0.3rem",
+        },
+      });
       navigate("/login");
       return;
     }
     let cartItems = getCart().filter((item) => item.id !== product._id);
     setCart(cartItems);
     setCartState(cartItems);
-    toast(`${product.name} removed from cart.`, { icon: "❌" });
+    toast(`removed`, {
+      icon: "❌",
+      style: {
+       fontSize: "0.7rem",
+          minWidth: "100px",
+          maxWidth: "70vw",
+          padding: "0.2rem 0.5rem",
+          borderRadius: "0.3rem",
+        },
+    });
   };
 
   // Helper to check if product is in cart
@@ -95,19 +144,36 @@ export default function ProductList() {
       navigate("/login");
       return;
     }
-    navigate('/checkout');
+    
+    sessionStorage.setItem("buyNowProduct", JSON.stringify(product));
+    navigate('/checkout?buynow=1');
   };
 
   return (
     <>
       <Header />
+      {/* Go to Cart Suggestion */}
+      {showGoToCart && (
+        <div className="flex justify-center mt-4">
+          <button
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow transition-all animate-bounce"
+            style={{ zIndex: 50 }}
+            onClick={() => navigate("/cart")}
+          >
+            🛒 Go to Cart
+          </button>
+        </div>
+      )}
       <div className="min-h-screen bg-gradient-to-b from-blue-100 to-blue-300 p-4 sm:p-6 pt-16 pb-16">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-gray-800">
             Explore Trending Products
           </h1>
           {loading ? (
-            <div className="text-center py-10">Loading...</div>
+            <div className="flex flex-col items-center py-10">
+              <span className="mb-2 text-blue-700 font-semibold">Loading...</span>
+              <span className="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></span>
+            </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {products.length === 0 ? (
@@ -119,7 +185,15 @@ export default function ProductList() {
                     onClick={() => navigate(`/products/${product._id}`)}
                     className="cursor-pointer"
                   >
-                    <Card product={product} />
+                    <Card
+                      product={product}
+                      showActions={true}
+                      onBuyNow={() => handleBuyNow(product)}
+                      onAddToCart={() => handleAddToCart(product)}
+                      onRemoveFromCart={() => handleRemoveFromCart(product)}
+                      isInCart={isInCart(product._id)}
+                      justAdded={justAddedId === product._id}
+                    />
                   </div>
                 ))
               )}
