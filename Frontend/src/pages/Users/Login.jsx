@@ -20,6 +20,7 @@ export default function Login() {
       const errorMessage = "Please enter a valid phone number or email.";
       setError(errorMessage);
       toast.error(errorMessage);
+      window.location.reload();
       return;
     }
 

@@ -10,6 +10,9 @@ import Signup from "../pages/Users/Signup";
 import ProductList from "../pages/Catalogs/ProductList";
 import ProductDetails from "../pages/Catalogs/ProductDetails";
 import ProductCard from "../pages/Catalogs/ProductCard";
+import Cart from "../pages/Catalogs/Cart";
+import Checkout from "../pages/Payments/Checkout";
+
 // import CategoryFilter from "../pages/Catalogs/CategoryFilter";
 
 const appRoutes = [
@@ -17,15 +20,15 @@ const appRoutes = [
   { path: "/", element: <Navigate to="/products" /> },
   { path: "/login", element: <Login /> },
   { path: "/signup", element: <Signup /> },
-//   { path: "/orders", element: <Orders /> },
-//   { path: "/checkout", element: <Checkout /> },
-//   { path: "/order-summary", element: <OrderSummary /> },
+  // { path: "/orders", element: <Orders /> },
+  { path: "/checkout", element: <Checkout /> },
 //   { path: "/payment", element: <Payment /> },
 //   { path: "/payment-success", element: <PaymentSuccess /> },
   { path: "/products", element: <ProductList /> },
   { path: "/products/:id", element: <ProductDetails /> },
   { path: "/product-card", element: <ProductCard /> },
 //   { path: "/categories", element: <CategoryFilter /> },
+  {path:"/cart", element: <Cart />}, 
 ];
 
 export default appRoutes;

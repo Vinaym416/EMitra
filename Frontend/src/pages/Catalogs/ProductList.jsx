@@ -1,84 +1,206 @@
-import React from 'react';
-import Card from "../../components/ui/card";
+import React, { useState, useEffect } from "react";
 import Badge from "../../components/ui/badge";
 import Button from "../../components/ui/button";
-import { Star } from 'lucide-react';
+import { Star } from "lucide-react";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import Header from "../../components/ui/Header";
+import BottomNav from "../../components/ui/ButtomNav";
+import { useAuth } from "../../contexts/AuthContext"; 
 
 const dummyProducts = [
   {
     id: 1,
-    name: 'Women Floral Dress',
-    price: '₹799',
+    name: "Women Floral Dress",
+    price: "₹799",
     rating: 4.5,
-    category: 'Clothing',
-    image: 'https://source.unsplash.com/300x400/?dress,women',
+    category: "Clothing",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2G3-RHjmhpIOJVaZJI0mRQXGEy9R-zLeorw&s",
     trending: true,
   },
   {
     id: 2,
-    name: 'Organic Lipstick Combo',
-    price: '₹499',
+    name: "Organic Lipstick Combo",
+    price: "₹499",
     rating: 4.2,
-    category: 'Cosmetics',
-    image: 'https://source.unsplash.com/300x400/?lipstick,makeup',
+    category: "Cosmetics",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRd5m_ZXkiav_y2YGsCnXuKSU2CaG17V0ZQGw&s",
     trending: false,
   },
   {
     id: 3,
-    name: 'Men Casual Shirt',
-    price: '₹699',
+    name: "Men Casual Shirt",
+    price: "₹699",
     rating: 4.0,
-    category: 'Clothing',
-    image: 'https://source.unsplash.com/300x400/?shirt,men',
+    category: "Clothing",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVqUpQG_KHcjeTQcQaaiCAaZVhCZFPqv5ylw&s",
     trending: true,
   },
   {
     id: 4,
-    name: 'Night Glow Face Cream',
-    price: '₹599',
+    name: "Night Glow Face Cream",
+    price: "₹599",
     rating: 4.6,
-    category: 'Cosmetics',
-    image: 'https://source.unsplash.com/300x400/?facecream,beauty',
+    category: "Cosmetics",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKMNu--s5kpPokQZWzT1QvjCqhkg3YyZViEw&s",
     trending: true,
   },
 ];
 
+// Helper to get and set cart in localStorage
+function getCart() {
+  try {
+    return JSON.parse(localStorage.getItem("cartItems")) || [];
+  } catch {
+    return [];
+  }
+}
+function setCart(items) {
+  localStorage.setItem("cartItems", JSON.stringify(items));
+}
+
 export default function ProductList() {
+  const [cart, setCartState] = useState([]);
+  const navigate = useNavigate();
+  const { authUser } = useAuth(); // <-- Use auth context
+
+  // Sync cart state with localStorage
+  useEffect(() => {
+    setCartState(getCart());
+  }, []);
+
+  // Add to cart handler
+  const handleAddToCart = (product) => {
+    if (!authUser) {
+      toast.error("Please login to add items to cart.");
+      navigate("/login");
+      return;
+    }
+    let cartItems = getCart();
+    const priceNumber = Number(product.price.replace(/[^\d]/g, "")); // Remove ₹
+    const existing = cartItems.find((item) => item.id === product.id);
+    if (existing) {
+      toast("Already added to cart!", { icon: "🛒" });
+      return;
+    }
+    cartItems.push({
+      id: product.id,
+      name: product.name,
+      price: priceNumber,
+      quantity: 1,
+      category: product.category,
+      image: product.image,
+    });
+    setCart(cartItems);
+    setCartState(cartItems);
+    toast.success(`${product.name} added to cart!`);
+  };
+
+  // Remove from cart handler
+  const handleRemoveFromCart = (product) => {
+    if (!authUser) {
+      toast.error("Please login first.");
+      navigate("/login");
+      return;
+    }
+    let cartItems = getCart().filter((item) => item.id !== product.id);
+    setCart(cartItems);
+    setCartState(cartItems);
+    toast(`${product.name} removed from cart.`, { icon: "❌" });
+  };
+
+  // Helper to check if product is in cart
+  const isInCart = (id) => cart.some((item) => item.id === id);
+
+  // Buy Now handler
+  const handleBuyNow = (product) => {
+    if (!authUser) {
+      toast.error("Please login to continue.");
+      navigate("/login");
+      return;
+    }
+    navigate('/checkout');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-100 to-blue-300 p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Explore Trending Products</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {/* {dummyProducts.map((product) => (
-            <Card key={product.id} className="hover:scale-105 transition-transform duration-300 shadow-xl rounded-2xl">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="rounded-t-2xl h-64 w-full object-cover"
-              />
-              <div className="p-4 space-y-2">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-lg font-semibold text-gray-700">{product.name}</h2>
-                  {product.trending && <Badge variant="secondary"> Trending</Badge>}
-                </div>
-                <p className="text-sm text-gray-500">{product.category}</p>
-                <div className="flex justify-between items-center">
-                  <span className="text-xl font-bold text-pink-600">{product.price}</span>
-                  <span className="flex items-center text-yellow-500 text-sm">
-                    <Star className="w-4 h-4 fill-yellow-400 mr-1" /> {product.rating}
-                  </span>
-                </div>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg mt-2">Buy Now</Button>
-              </div>
-            </Card>
-          ))} */}
+    <>
+      <Header />
+      <div className="min-h-screen bg-gradient-to-b from-blue-100 to-blue-300 p-4 sm:p-6 pt-16 pb-16">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-gray-800">
+            Explore Trending Products
+          </h1>
 
-
-          {dummyProducts.map((product) => (
-            <Card key={product.id} product={product} />
-          ))}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {dummyProducts.map((product) => {
+              const inCart = isInCart(product.id);
+              return (
+                <div
+                  key={product.id}
+                  className="bg-white rounded-lg shadow hover:shadow-md transition duration-300"
+                >
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="rounded-t-lg w-full h-40 sm:h-48 object-cover"
+                  />
+                  <div className="p-3 space-y-1">
+                    <div className="flex justify-between items-center">
+                      <h2 className="text-sm font-semibold text-gray-800 truncate">
+                        {product.name}
+                      </h2>
+                      {product.trending && (
+                        <Badge
+                          variant="secondary"
+                          className="text-xs px-2 py-0.5"
+                        >
+                          Trending
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500">{product.category}</p>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-base font-bold text-pink-600">
+                        {product.price}
+                      </span>
+                      <span className="flex items-center text-yellow-500 text-xs">
+                        <Star className="w-4 h-4 fill-yellow-400 mr-1" />{" "}
+                        {product.rating}
+                      </span>
+                    </div>
+                    <Button
+                      className="bg-green-600 hover:bg-green-700 text-white rounded-lg w-full  px-5 py-2 shadow-md"
+                      onClick={() => handleBuyNow(product)}
+                    >
+                      Buy Now
+                    </Button>
+                    {inCart ? (
+                      <Button
+                        className="w-full bg-gray-400 hover:bg-gray-500 text-white rounded-md py-1 mt-1 text-sm"
+                        onClick={() => handleRemoveFromCart(product)}
+                      >
+                        Remove from Cart
+                      </Button>
+                    ) : (
+                      <Button
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-md py-1 mt-1 text-sm"
+                        onClick={() => handleAddToCart(product)}
+                      >
+                        Add to Cart
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
-    </div>
+      <BottomNav />
+    </>
   );
 }

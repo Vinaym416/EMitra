@@ -45,6 +45,27 @@ class CatalogController {
             res.status(500).json({ message: error.message });
         }
     }
-}
 
+
+    async getCatalogItemById(req, res) {
+        try {
+            const item = await this.CatalogModel.findById(req.params.id);
+            if (!item) {
+                return res.status(404).json({ message: 'Item not found' });
+            }
+            res.status(200).json(item);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    }
+
+    async getAllCatalogItems(req, res) {
+        try {
+            const items = await this.CatalogModel.find();
+            res.status(200).json(items);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    }
+}
 module.exports = CatalogController;
