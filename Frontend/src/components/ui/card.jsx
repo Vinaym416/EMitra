@@ -1,16 +1,15 @@
 import React from 'react';
-import  Card  from "../../components/ui/card";
-import  Badge  from "../../components/ui/badge";
-import Button  from "../../components/ui/button";
 import { Star } from 'lucide-react';
+import Badge from './badge';
+import Button from './button';
 import { useNavigate } from 'react-router-dom';
 
-export default function ProductCard({ product }) {
+export default function Card({ product }) {
   const navigate = useNavigate();
 
   return (
-    <Card
-      className="hover:scale-105 transition-transform duration-300 shadow-xl rounded-2xl cursor-pointer"
+    <div
+      className="bg-white hover:scale-105 transition-transform duration-300 shadow-xl rounded-2xl cursor-pointer"
       onClick={() => navigate(`/product/${product.id}`)}
     >
       <img
@@ -18,7 +17,7 @@ export default function ProductCard({ product }) {
         alt={product.name}
         className="rounded-t-2xl h-64 w-full object-cover"
       />
-      <CardContent className="p-4 space-y-2">
+      <div className="p-4 space-y-2">
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-semibold text-gray-700 truncate">{product.name}</h2>
           {product.trending && <Badge variant="secondary"> Trending</Badge>}
@@ -33,7 +32,7 @@ export default function ProductCard({ product }) {
         <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg mt-2">
           Buy Now
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

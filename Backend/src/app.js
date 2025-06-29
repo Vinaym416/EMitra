@@ -7,13 +7,24 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const  connectDB  = require('./config/db.js');
 const authMiddleware = require('./middleware/authMiddleware');
 const tokenMiddleware = require('./middleware/tokenMiddleware');
+const cors = require('cors');
 
 const app = express();
 
 // Middleware
 app.use(bodyParser.json());
-app.use(authMiddleware);
-app.use(tokenMiddleware);
+
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"], 
+    allowedHeaders: ["Content-Type", "Authorization"], 
+  })
+);
+
+// app.use(authMiddleware);
+// app.use(tokenMiddleware);
 
 // Database connection
 connectDB();

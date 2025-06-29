@@ -6,8 +6,8 @@ import toast from "react-hot-toast";
 
 export default function Login() {
   const navigate = useNavigate();
-  const [phoneOrEmail, setPhoneOrEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [phoneOrEmail, setPhoneOrEmail] = useState("test1@gmail.com");
+  const [password, setPassword] = useState("test1404");
   const [error, setError] = useState(null);
 
   const handleLogin = async (e) => {
@@ -24,7 +24,6 @@ export default function Login() {
     }
 
     try {
-      // The backend expects "phonenumber" for phone login, not "phone"
       const payload = isPhone
         ? { phonenumber: phoneOrEmail, password }
         : { email: phoneOrEmail, password };
@@ -33,7 +32,7 @@ export default function Login() {
 
       localStorage.setItem("token", res.data.token);
       toast.success("Login successful!");
-      navigate("/home");
+      navigate("/products");
     } catch (err) {
       const errorMessage = err.response?.data?.message || "Login failed";
       setError(errorMessage);
@@ -43,7 +42,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-100 to-blue-300">
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
+      <div className="bg-white p-4 sm:p-8 rounded-2xl shadow-lg w-full max-w-md mx-2">
         <h2 className="text-2xl font-bold mb-6 text-center text-blue-700">
           Login to your Account
         </h2>

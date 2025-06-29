@@ -50,10 +50,16 @@ export default function Signup() {
     }
 
     try {
-      const res = await axiosInstance.post("/auth/register", form);
+      const payload = {
+        username: form.username,
+        email: form.email,
+        phonenumber: form.phonenumber,
+        password: form.password,
+      };
+      const res = await axiosInstance.post("/auth/register", payload);
       localStorage.setItem("token", res.data.token);
       toast.success("Signup successful!");
-      navigate("/home");
+      navigate("/products");
     } catch (err) {
       const errorMessage = err.response?.data?.message || "Signup failed";
       setError(errorMessage);
@@ -63,7 +69,7 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-100 to-blue-300">
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
+      <div className="bg-white p-4 sm:p-8 rounded-2xl shadow-lg w-full max-w-md mx-2">
         <h2 className="text-2xl font-bold mb-6 text-center text-blue-700">
           Create your Account
         </h2>
