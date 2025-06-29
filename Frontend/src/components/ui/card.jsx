@@ -2,22 +2,12 @@ import React from "react";
 import { Star } from "lucide-react";
 import Badge from "./badge";
 import Button from "./button";
-import { useNavigate } from "react-router-dom";
 
 export default function Card({ product, children, showActions = true }) {
-  const navigate = useNavigate();
-
-  const handleCardClick = () => {
-    navigate(`/product/${product.id}`);
-  };
-
   return (
-    <div
-      className="bg-white hover:scale-[1.03] transition-transform duration-300 shadow-lg rounded-xl cursor-pointer"
-      onClick={handleCardClick}
-    >
+      <div className="bg-white shadow-lg rounded-xl transition-transform duration-300 hover:scale-105">
       <img
-        src={product.image}
+        src={product.imageUrl}
         alt={product.name}
         className="rounded-t-xl h-48 sm:h-56 w-full object-cover"
       />
@@ -46,21 +36,12 @@ export default function Card({ product, children, showActions = true }) {
           <div className="pt-2 space-y-2">
             <Button
               className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 rounded-md"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/product/${product.id}`);
-              }}
             >
               Buy Now
             </Button>
 
             <Button
               className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm py-2 rounded-md border"
-              onClick={(e) => {
-                e.stopPropagation();
-                // Add to cart logic here
-                alert(`Added "${product.name}" to cart.`);
-              }}
             >
               Add to Cart
             </Button>

@@ -37,10 +37,10 @@ export default function ProductCard({ product }) {
   return (
     <Card
       className="hover:scale-[1.03] transition-transform duration-300 shadow-lg rounded-xl cursor-pointer bg-white"
-      onClick={() => navigate(`/product/${product.id}`)}
+      onClick={() => navigate(`/products/${product._id}`)}
     >
       <img
-        src={product.image}
+        src={product.imageUrl}
         alt={product.name}
         className="rounded-t-xl h-48 sm:h-56 w-full object-cover"
       />

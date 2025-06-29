@@ -11,4 +11,6 @@ router.get('/:id', ProductController.getProductById);
 // Add a product (no auth)
 router.post('/add', ProductController.addProduct);
 
+router.delete('/all', ProductController.deleteAllProducts);
+
 module.exports = router;

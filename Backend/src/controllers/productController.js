@@ -41,3 +41,12 @@ exports.addProduct = async (req, res) => {
     res.status(500).json({ error: 'Failed to add product' });
   }
 };
+
+exports.deleteAllProducts = async (req, res) => {
+  try {
+    await Product.deleteMany({});
+    res.status(200).json({ message: "All products deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete products" });
+  }
+};
