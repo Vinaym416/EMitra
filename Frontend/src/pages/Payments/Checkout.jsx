@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Button from '../../components/ui/button';
 
-// Helper to get cart from localStorage
+// Retrieve cart from localStorage
 function getCart() {
   try {
     return JSON.parse(localStorage.getItem("cartItems")) || [];
@@ -25,28 +25,32 @@ export default function CheckoutPage() {
       case 1: return <ShippingForm onNext={() => setStep(2)} />;
       case 2: return <DeliveryMethod onNext={() => setStep(3)} />;
       case 3: return <BillingForm onNext={() => setStep(4)} />;
-      case 4: return <PaymentForm onNext={() => setStep(5)} />;
+      case 4: return (
+        <PaymentForm
+          cartItems={cartItems}
+          shippingCost={shippingCost}
+          taxes={taxes}
+          onSuccess={() => setStep(5)}
+        />
+      );
       case 5: return <OrderConfirmation />;
       default: return null;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10">
+    <div className="min-h-screen bg-gray-50 py-10 px-4">
       <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>{renderStep()}</div>
         <div>
-          <OrderSummary
-            cartItems={cartItems}
-            shippingCost={shippingCost}
-            taxes={taxes}
-          />
+          <OrderSummary cartItems={cartItems} shippingCost={shippingCost} taxes={taxes} />
         </div>
       </div>
     </div>
   );
 }
 
+// Step 1: Shipping Info
 function ShippingForm({ onNext }) {
   return (
     <form className="bg-white p-6 rounded-lg shadow-md space-y-4" onSubmit={e => { e.preventDefault(); onNext(); }}>
@@ -62,6 +66,7 @@ function ShippingForm({ onNext }) {
   );
 }
 
+// Step 2: Delivery Method
 function DeliveryMethod({ onNext }) {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
@@ -83,6 +88,7 @@ function DeliveryMethod({ onNext }) {
   );
 }
 
+// Step 3: Billing Info
 function BillingForm({ onNext }) {
   return (
     <form className="bg-white p-6 rounded-lg shadow-md space-y-4" onSubmit={e => { e.preventDefault(); onNext(); }}>
@@ -96,69 +102,116 @@ function BillingForm({ onNext }) {
   );
 }
 
-function PaymentForm({ onNext }) {
+// Step 4: Razorpay Integration
+function PaymentForm({ cartItems, shippingCost, taxes, onSuccess }) {
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalAmount = subtotal + shippingCost + taxes;
+
+  const loadRazorpayScript = () => {
+    return new Promise(resolve => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handleRazorpayPayment = async () => {
+    const res = await loadRazorpayScript();
+    if (!res) return alert("Razorpay SDK failed to load.");
+
+    const options = {
+      key: process.env.REACT_APP_RAZORPAY_KEY_ID || "rzp_test_1234567890", // Replace with your key
+      amount: totalAmount * 100,
+      currency: "INR",
+      name: "My Shop",
+      description: "Order Payment",
+      handler: function (response) {
+        console.log("Payment successful:", response);
+        onSuccess();
+      },
+      prefill: {
+        name: "John Doe",
+        email: "johndoe@example.com",
+        contact: "9999999999"
+      },
+      theme: {
+        color: "#3399cc"
+      }
+    };
+
+    const paymentObject = new window.Razorpay(options);
+    paymentObject.open();
+  };
+
   return (
-    <form className="bg-white p-6 rounded-lg shadow-md space-y-4" onSubmit={e => { e.preventDefault(); onNext(); }}>
+    <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
       <h3 className="text-xl font-semibold">Payment</h3>
-      <input className="w-full p-2 border rounded" placeholder="Card Number" required />
-      <div className="flex gap-2">
-        <input className="w-1/2 p-2 border rounded" placeholder="MM/YY" required />
-        <input className="w-1/2 p-2 border rounded" placeholder="CVV" required />
-      </div>
-      <Button className="w-full bg-blue-600 text-white py-2 rounded" type="submit">
-        Pay Now
+      <p className="text-gray-600">You'll be redirected to Razorpay to complete the payment.</p>
+      <Button
+        className="w-full bg-green-600 text-white py-2 rounded"
+        onClick={handleRazorpayPayment}
+      >
+        Pay ₹{totalAmount.toLocaleString()}
       </Button>
-    </form>
+    </div>
   );
 }
 
+// Step 5: Order Confirmation
 function OrderConfirmation() {
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md space-y-4 text-center">
+    <div className="bg-white p-6 rounded-lg shadow-md text-center space-y-4">
       <h3 className="text-2xl font-semibold text-green-600">✅ Payment Successful!</h3>
-      <p>Your order has been placed. Thank you!</p>
-      <Button className="mt-4 bg-green-600 text-white py-2 rounded" onClick={() => window.location.href = '/'}>
+      <p>Your order has been placed. Thank you for shopping with us!</p>
+      <Button
+        className="mt-4 bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded"
+        onClick={() => window.location.href = '/'}
+      >
         Back to Home
       </Button>
     </div>
   );
 }
 
+// Order Summary Component (Right Column)
 function OrderSummary({ cartItems, shippingCost, taxes }) {
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = subtotal + shippingCost + taxes;
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
       <h3 className="text-xl font-semibold mb-2">Order Summary</h3>
-      <ul className="divide-y">
-        {cartItems.length === 0 ? (
-          <li className="py-2 text-gray-500">Your cart is empty.</li>
-        ) : (
-          cartItems.map(item => (
-            <li key={item.id} className="py-2 flex justify-between items-center">
-              <span>
-                {item.name} <span className="text-xs text-gray-400">x{item.quantity}</span>
-              </span>
-              <span>₹{item.price * item.quantity}</span>
+
+      {cartItems.length === 0 ? (
+        <p className="text-gray-500 text-sm">No items in cart.</p>
+      ) : (
+        <ul className="divide-y">
+          {cartItems.map(item => (
+            <li key={item.id} className="py-2 flex justify-between text-sm">
+              <span>{item.name} <span className="text-xs text-gray-400">x{item.quantity}</span></span>
+              <span>₹{(item.price * item.quantity).toLocaleString()}</span>
             </li>
-          ))
-        )}
-      </ul>
-      <div className="flex justify-between">
+          ))}
+        </ul>
+      )}
+
+      <div className="flex justify-between pt-4 text-sm">
         <span>Subtotal</span>
-        <span>₹{subtotal}</span>
+        <span>₹{subtotal.toLocaleString()}</span>
       </div>
-      <div className="flex justify-between">
+      <div className="flex justify-between text-sm">
         <span>Shipping</span>
         <span>₹{shippingCost}</span>
       </div>
-      <div className="flex justify-between">
+      <div className="flex justify-between text-sm">
         <span>Taxes</span>
         <span>₹{taxes}</span>
       </div>
-      <div className="flex justify-between font-bold border-t pt-2">
+      <div className="flex justify-between font-bold border-t pt-3 text-base">
         <span>Total</span>
-        <span>₹{subtotal + shippingCost + taxes}</span>
+        <span>₹{total.toLocaleString()}</span>
       </div>
     </div>
   );

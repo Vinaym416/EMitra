@@ -20,7 +20,6 @@ export default function Login() {
       const errorMessage = "Please enter a valid phone number or email.";
       setError(errorMessage);
       toast.error(errorMessage);
-      window.location.reload();
       return;
     }
 
@@ -32,8 +31,11 @@ export default function Login() {
       const res = await axiosInstance.post("/auth/login", payload);
 
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("authUser", JSON.stringify(res.data.user)); // <-- Store user
       toast.success("Login successful!");
-      navigate("/products");
+      navigate("/products"); // Redirect to products page
+      window.location.reload();
+     
     } catch (err) {
       const errorMessage = err.response?.data?.message || "Login failed";
       setError(errorMessage);
