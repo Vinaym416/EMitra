@@ -1,12 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/authRoutes');
-const catalogRoutes = require('./routes/catalogRoutes');
+const catalogRoutes = require('./routes/cartRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const  connectDB  = require('./config/db.js');
 const authMiddleware = require('./middleware/authMiddleware');
-const tokenMiddleware = require('./middleware/tokenMiddleware');
 const cors = require('cors');
 
 const app = express();
