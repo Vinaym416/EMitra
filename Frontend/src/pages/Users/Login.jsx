@@ -3,6 +3,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { axiosInstance } from "../../lib/axios.js";
 import toast from "react-hot-toast";
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -31,16 +32,35 @@ export default function Login() {
       const res = await axiosInstance.post("/auth/login", payload);
 
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("authUser", JSON.stringify(res.data.user)); 
+      localStorage.setItem("authUser", JSON.stringify(res.data.user));
       toast.success("Login successful!");
-      navigate("/products"); 
+      navigate("/products");
       window.location.reload();
-     
     } catch (err) {
       const errorMessage = err.response?.data?.message || "Login failed";
       setError(errorMessage);
       toast.error(errorMessage);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    
+    try {
+      const res = await axiosInstance.post("/auth/google-login", {
+        token: credentialResponse.credential,
+      });
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("authUser", JSON.stringify(res.data.user));
+      toast.success("Login successful!");
+      navigate("/products");
+      window.location.reload();
+    } catch (err) {
+      toast.error("Google login failed");
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast.error("Google login was cancelled or failed.");
   };
 
   return (
@@ -93,6 +113,18 @@ export default function Login() {
             Login
           </button>
         </form>
+
+        <div className="my-4 flex items-center">
+          <div className="flex-grow border-t border-gray-200"></div>
+          <span className="mx-2 text-gray-400 text-xs">OR</span>
+          <div className="flex-grow border-t border-gray-200"></div>
+        </div>
+
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={handleGoogleError}
+          width="100%"
+        />
 
         <p className="mt-4 text-center text-sm text-gray-600">
           Don't have an account?

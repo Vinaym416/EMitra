@@ -12,4 +12,7 @@ router.post('/login', authController.login);
 // Get user profile route (protected)
 router.get('/profile', authMiddleware, authController.getProfile);
 
+// Google login route
+router.post('/google-login', authController.googleLogin);
+
 module.exports = router;
