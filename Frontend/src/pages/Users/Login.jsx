@@ -31,9 +31,9 @@ export default function Login() {
       const res = await axiosInstance.post("/auth/login", payload);
 
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("authUser", JSON.stringify(res.data.user)); // <-- Store user
+      localStorage.setItem("authUser", JSON.stringify(res.data.user)); 
       toast.success("Login successful!");
-      navigate("/products"); // Redirect to products page
+      navigate("/products"); 
       window.location.reload();
      
     } catch (err) {
