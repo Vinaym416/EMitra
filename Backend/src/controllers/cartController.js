@@ -21,7 +21,7 @@ exports.getProductById = async (req, res) => {
 };
 
 // Optional: Add product to your own DB
-exports.addProduct = async (req, rxxxzes) => {
+exports.addProduct = async (req, res) => {
   const { title, price, description, image, category } = req.body;
 
   try {
