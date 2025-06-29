@@ -4,7 +4,6 @@ import Login from "../pages/Users/Login";
 import Signup from "../pages/Users/Signup";
 import ProductList from "../pages/Catalogs/ProductList";
 import ProductDetails from "../pages/Catalogs/ProductDetails";
-import ProductCard from "../pages/Catalogs/ProductCard";
 import Cart from "../pages/Catalogs/Cart";
 import Checkout from "../pages/Payments/Checkout";
 import Payment from "../pages/Payments/Payment";
@@ -18,8 +17,8 @@ const appRoutes = [
   { path: "/signup", element: <Signup /> },
   { path: "/checkout", element: <Checkout /> },
   { path: "/products", element: <ProductList /> },
-  { path: "/products/:id", element: <ProductDetails /> },
-  { path: "/product-card", element: <ProductCard /> },
+  { path: "/product/:id", element: <ProductDetails /> },
+
   { path: "/payment", element: <Payment /> },
 
   {path:"/cart", element: <Cart />}, 

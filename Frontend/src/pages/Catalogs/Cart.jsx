@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Card from '../../components/ui/card';
 import Button from '../../components/ui/button';
 import { Trash2, Plus, Minus, Heart } from 'lucide-react';
 import Header from "../../components/ui/Header";
 import BottomNav from "../../components/ui/ButtomNav";
+import { useAuth } from "../../contexts/AuthContext";
 
 // Helper to get and set cart in localStorage
 function getCart() {
@@ -18,20 +18,61 @@ function setCart(items) {
   localStorage.setItem("cartItems", JSON.stringify(items));
 }
 
+// Card component for displaying each cart item
+function Card({ product, children, className = '' }) {
+  const navigate = useNavigate();
+
+  if (!product) return null;
+
+  return (
+    <div
+      className={`bg-white hover:scale-105 transition-transform duration-300 shadow-xl rounded-2xl cursor-pointer ${className}`}
+      onClick={() => navigate(`/product/${product.id}`)}
+    >
+      <img
+        src={product.image}
+        alt={product.name}
+        className="rounded-t-2xl h-56 sm:h-64 w-full object-cover"
+      />
+      <div className="p-4 space-y-2">
+        <div className="flex justify-between items-center">
+          <h2 className="text-sm sm:text-base font-semibold text-gray-700 truncate">
+            {product.name}
+          </h2>
+          {product.trending && <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">Trending</span>}
+        </div>
+        <p className="text-xs text-gray-500">{product.category}</p>
+        <div className="flex justify-between items-center">
+          <span className="text-base sm:text-lg font-bold text-pink-600">
+            ₹{product.price}
+          </span>
+          {product.rating && (
+            <span className="flex items-center text-yellow-500 text-sm">
+              {/* You can use an icon here */}
+              ★ {product.rating}
+            </span>
+          )}
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// The actual Cart page
 export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [savedItems, setSavedItems] = useState([]);
   const navigate = useNavigate();
+  const { authUser } = useAuth();
 
-  // Load cart from localStorage on mount
   useEffect(() => {
-    setCartItems(getCart());
-  }, []);
-
-  // Update localStorage whenever cartItems changes
-  useEffect(() => {
-    setCart(getCart()); // keep in sync in case other tabs update
-  }, []);
+    if (authUser ) {
+      setCartItems(getCart());
+    } else {
+      setCartItems([]);
+    }
+  }, [authUser]);
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -82,31 +123,37 @@ export default function Cart() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gradient-to-b from-blue-100 to-blue-300 p-3 sm:p-5 pb-32 pt-16">
-        {/* Fixed Top Bar */}
-        <div className="fixed top-0 left-0 w-full z-30 bg-white shadow-md py-3 px-4 flex justify-between items-center">
-          <span className="font-medium text-sm sm:text-base text-gray-700">Subtotal</span>
-          <span className="text-base sm:text-lg font-bold text-pink-600">
-            ₹{subtotal.toLocaleString()}
-          </span>
-          <Button
-            className="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-3 py-1.5 text-sm shadow-sm"
-            onClick={() => navigate('/payment')}
-          >
-            Proceed to Checkout
-          </Button>
-        </div>
+      {/* Fixed Subtotal Bar */}
+      <div className="fixed top-14 left-0 w-full z-30 bg-white shadow-md py-3 px-4 flex justify-between items-center">
+        <span className="font-medium text-sm sm:text-base text-gray-700">Subtotal</span>
+        <span className="text-base sm:text-lg font-bold text-pink-600">
+          ₹{subtotal.toLocaleString()}
+        </span>
+      
+        <Button
+          className="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-3 py-1.5 text-sm shadow-sm"
+          onClick={() => {
+            if (!authUser || !authUser.id) {
+              toast.error("Please login to checkout.");
+              navigate("/login");
+              return;
+            }
+            navigate('/payment');
+          }}
+        >
+          Proceed to Checkout
+        </Button>
 
-        <div className="max-w-6xl mx-auto pt-24">
+      </div>
+      <div className="min-h-screen bg-gradient-to-b from-blue-100 to-blue-300 p-3 sm:p-5 pb-32 pt-32">
+        <div className="max-w-6xl mx-auto">
           <h1 className="text-xl sm:text-2xl font-bold mb-5 text-center text-gray-800">Your Cart</h1>
-
-          {/* Cart Items */}
           {cartItems.length === 0 ? (
             <div className="text-center text-gray-600 text-base">Your cart is empty.</div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {cartItems.map((item) => (
-                <Card key={item.id} product={item} className="!p-3 shadow-md bg-white rounded-lg">
+                <Card key={item.id} product={item}>
                   <div className="flex justify-between items-center mt-3">
                     <div className="flex items-center gap-1">
                       <Button
@@ -158,7 +205,7 @@ export default function Cart() {
             </div>
           )}
 
-          {/* Saved for Later */}
+          {/* Saved for Later Section */}
           {savedItems.length > 0 && (
             <div className="mt-10">
               <h2 className="text-lg sm:text-xl font-bold mb-4 text-gray-700">Saved for Later</h2>
@@ -190,8 +237,7 @@ export default function Cart() {
               </div>
             </div>
           )}
-
-          {/* Order Summary */}
+          {/* Order Summary at the bottom */}
           {cartItems.length > 0 && (
             <div className="max-w-md mx-auto mt-10 bg-white rounded-xl shadow-lg p-5 text-right">
               <div className="flex justify-between mb-2 text-sm sm:text-base">

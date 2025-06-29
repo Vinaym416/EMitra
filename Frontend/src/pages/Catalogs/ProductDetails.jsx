@@ -7,31 +7,9 @@ import toast from "react-hot-toast";
 import Header from "../../components/ui/Header";
 import BottomNav from "../../components/ui/ButtomNav";
 import { useAuth } from "../../contexts/AuthContext"; 
+import { axiosInstance } from "../../lib/axios"; 
 
-const dummyProducts = [
-  {
-    id: 1,
-    name: 'Women Floral Dress',
-    price: '₹799',
-    rating: 4.5,
-    category: 'Clothing',
-    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2G3-RHjmhpIOJVaZJI0mRQXGEy9R-zLeorw&s',
-    trending: true,
-    description: 'Beautiful floral printed dress for casual or party wear.',
-  },
-  {
-    id: 2,
-    name: 'Organic Lipstick Combo',
-    price: '₹499',
-    rating: 4.2,
-    category: 'Cosmetics',
-    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKMNu--s5kpPokQZWzT1QvjCqhkg3YyZViEw&s',
-    trending: false,
-    description: 'A set of organic lipsticks for long-lasting color and care.',
-  },
-];
 
-// Helper to get and set cart in localStorage
 function getCart() {
   try {
     return JSON.parse(localStorage.getItem("cartItems")) || [];
@@ -45,21 +23,26 @@ function setCart(items) {
 
 export default function ProductDetails() {
   const { id } = useParams();
-  const product = dummyProducts.find((p) => p.id === parseInt(id));
+  const [product, setProduct] = useState(null); 
   const [cart, setCartState] = useState([]);
-  const { authUser } = useAuth(); // <-- Use auth context
+  const { authUser } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     setCartState(getCart());
-  }, []);
+ 
+    axiosInstance.get(`/catalog/${id}`)
+      .then(res => setProduct(res.data))
+      .catch(() => setProduct(null));
+  }, [id]);
 
-  if (!product)
+  if (product === null) {
     return (
-      <div className="text-center mt-20 text-red-600 text-xl font-semibold">
-        Product not found
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-blue-100 to-blue-300">
+        <span className="inline-block w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></span>
       </div>
     );
+  }
 
   const isInCart = cart.some(item => item.id === product.id);
 
@@ -71,9 +54,9 @@ export default function ProductDetails() {
     }
     let cartItems = getCart();
     const priceNumber = Number(product.price.replace(/[^\d]/g, ""));
-    const existing = cartItems.find(item => item.id === product.id);
+    const existing = cartItems.find((item) => item.id === product.id);
     if (existing) {
-      toast('Already added to cart!', { icon: '🛒' });
+      toast("Already added to cart!", { icon: "🛒" });
       return;
     }
     cartItems.push({
@@ -141,7 +124,7 @@ export default function ProductDetails() {
               <span className="text-xl md:text-2xl text-pink-600 font-bold">{product.price}</span>
               <span className="flex items-center text-yellow-500 text-sm">
                 <Star className="w-4 h-4 fill-yellow-400 mr-1" />
-                {product.rating}
+                {product.rating?.rate ?? "N/A"}
               </span>
             </div>
 

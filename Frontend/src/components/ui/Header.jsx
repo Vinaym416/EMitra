@@ -12,6 +12,7 @@ export default function Header() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("authUser");
     toast.success("Logged out successfully!");
     setTimeout(() => {
       window.location.reload();

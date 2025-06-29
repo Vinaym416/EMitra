@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Button from '../../components/ui/button';
+import Header from "../../components/ui/Header";
+import BottomNav from "../../components/ui/ButtomNav";
+import { useNavigate } from "react-router-dom";
 
 // Retrieve cart from localStorage
 function getCart() {
@@ -15,6 +18,7 @@ export default function CheckoutPage() {
   const [cartItems, setCartItems] = useState([]);
   const shippingCost = 50;
   const taxes = 100;
+  const navigate = useNavigate();
 
   useEffect(() => {
     setCartItems(getCart());
@@ -22,15 +26,16 @@ export default function CheckoutPage() {
 
   const renderStep = () => {
     switch (step) {
-      case 1: return <ShippingForm onNext={() => setStep(2)} />;
-      case 2: return <DeliveryMethod onNext={() => setStep(3)} />;
-      case 3: return <BillingForm onNext={() => setStep(4)} />;
+      case 1: return <ShippingForm onNext={() => setStep(2)} onAddMore={() => navigate("/products")} />;
+      case 2: return <DeliveryMethod onNext={() => setStep(3)} onAddMore={() => navigate("/products")} />;
+      case 3: return <BillingForm onNext={() => setStep(4)} onAddMore={() => navigate("/products")} />;
       case 4: return (
         <PaymentForm
           cartItems={cartItems}
           shippingCost={shippingCost}
           taxes={taxes}
           onSuccess={() => setStep(5)}
+          onAddMore={() => navigate("/products")}
         />
       );
       case 5: return <OrderConfirmation />;
@@ -39,19 +44,23 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4">
-      <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div>{renderStep()}</div>
-        <div>
-          <OrderSummary cartItems={cartItems} shippingCost={shippingCost} taxes={taxes} />
+    <>
+      <Header />
+      <div className="min-h-screen bg-gray-50 py-10 px-4 pt-16 pb-16">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div>{renderStep()}</div>
+          <div>
+            <OrderSummary cartItems={cartItems} shippingCost={shippingCost} taxes={taxes} />
+          </div>
         </div>
       </div>
-    </div>
+      <BottomNav />
+    </>
   );
 }
 
-// Step 1: Shipping Info
-function ShippingForm({ onNext }) {
+//  Shipping Info
+function ShippingForm({ onNext, onAddMore }) {
   return (
     <form className="bg-white p-6 rounded-lg shadow-md space-y-4" onSubmit={e => { e.preventDefault(); onNext(); }}>
       <h3 className="text-xl font-semibold">Shipping Address</h3>
@@ -62,12 +71,19 @@ function ShippingForm({ onNext }) {
       <Button className="w-full bg-blue-600 text-white py-2 rounded" type="submit">
         Continue to Delivery
       </Button>
+      <Button
+        className="w-full bg-gray-200 text-gray-800 py-2 rounded mt-2"
+        type="button"
+        onClick={onAddMore}
+      >
+        Add More Items
+      </Button>
     </form>
   );
 }
 
-// Step 2: Delivery Method
-function DeliveryMethod({ onNext }) {
+//  Delivery Method
+function DeliveryMethod({ onNext, onAddMore }) {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
       <h3 className="text-xl font-semibold">Choose Delivery Method</h3>
@@ -84,12 +100,19 @@ function DeliveryMethod({ onNext }) {
       <Button className="w-full bg-blue-600 text-white py-2 rounded" onClick={onNext}>
         Continue to Billing
       </Button>
+      <Button
+        className="w-full bg-gray-200 text-gray-800 py-2 rounded mt-2"
+        type="button"
+        onClick={onAddMore}
+      >
+        Add More Items
+      </Button>
     </div>
   );
 }
 
-// Step 3: Billing Info
-function BillingForm({ onNext }) {
+//  Billing Info
+function BillingForm({ onNext, onAddMore }) {
   return (
     <form className="bg-white p-6 rounded-lg shadow-md space-y-4" onSubmit={e => { e.preventDefault(); onNext(); }}>
       <h3 className="text-xl font-semibold">Billing Details</h3>
@@ -98,12 +121,19 @@ function BillingForm({ onNext }) {
       <Button className="w-full bg-blue-600 text-white py-2 rounded" type="submit">
         Continue to Payment
       </Button>
+      <Button
+        className="w-full bg-gray-200 text-gray-800 py-2 rounded mt-2"
+        type="button"
+        onClick={onAddMore}
+      >
+        Add More Items
+      </Button>
     </form>
   );
 }
 
-// Step 4: Razorpay Integration
-function PaymentForm({ cartItems, shippingCost, taxes, onSuccess }) {
+//  Razorpay Integration
+function PaymentForm({ cartItems, shippingCost, taxes, onSuccess, onAddMore }) {
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalAmount = subtotal + shippingCost + taxes;
 
@@ -122,7 +152,7 @@ function PaymentForm({ cartItems, shippingCost, taxes, onSuccess }) {
     if (!res) return alert("Razorpay SDK failed to load.");
 
     const options = {
-      key: process.env.REACT_APP_RAZORPAY_KEY_ID || "rzp_test_1234567890", // Replace with your key
+      key: process.env.REACT_APP_RAZORPAY_KEY_ID || "rzp_test_1234567890", 
       amount: totalAmount * 100,
       currency: "INR",
       name: "My Shop",
@@ -154,6 +184,13 @@ function PaymentForm({ cartItems, shippingCost, taxes, onSuccess }) {
         onClick={handleRazorpayPayment}
       >
         Pay ₹{totalAmount.toLocaleString()}
+      </Button>
+      <Button
+        className="w-full bg-gray-200 text-gray-800 py-2 rounded mt-2"
+        type="button"
+        onClick={onAddMore}
+      >
+        Add More Items
       </Button>
     </div>
   );
