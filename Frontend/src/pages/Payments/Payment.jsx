@@ -1,12 +1,34 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Button from '../../components/ui/button';
 import Header from "../../components/ui/Header";
 import BottomNav from "../../components/ui/ButtomNav";
 
 export default function PaymentPage() {
   const navigate = useNavigate();
-  const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+  const location = useLocation();
+
+
+  let cartItems = [];
+  const params = new URLSearchParams(location.search);
+  if (params.get("buynow") === "1") {
+    const buyNowProduct = JSON.parse(sessionStorage.getItem("buyNowProduct"));
+    if (buyNowProduct) {
+      cartItems = [{
+        id: buyNowProduct._id || buyNowProduct.id,
+        name: buyNowProduct.name,
+        price: buyNowProduct.price,
+        quantity: buyNowProduct.quantity || 1, 
+        category: buyNowProduct.category,
+        image: buyNowProduct.imageUrl,
+      }];
+    }
+    console.log("Buy Now Product:", cartItems);
+  } else {
+    cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+  }
+
+
   const shippingCost = 50;
   const taxes = 100;
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -92,6 +114,7 @@ export default function PaymentPage() {
             <h3 className="text-xl font-semibold">Order Summary</h3>
             <ul className="divide-y">
               {cartItems.map(item => (
+                console.log("Cart Item:", item),
                 <li key={item.id} className="py-2 flex justify-between text-sm">
                   <span>
                     {item.name}

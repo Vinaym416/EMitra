@@ -16,11 +16,17 @@ function getCart() {
 
 export default function CheckoutPage() {
   const [step, setStep] = useState(1);
-  const [shippingFields, setShippingFields] = useState({
-    fullName: "",
-    address: "",
-    cityStateZip: "",
-    phone: ""
+  
+  const [shippingFields, setShippingFields] = useState(() => {
+    const saved = localStorage.getItem("shippingAddress");
+    return saved
+      ? JSON.parse(saved)
+      : {
+          fullName: "",
+          address: "",
+          cityStateZip: "",
+          phone: ""
+        };
   });
   const [cartItems, setCartItems] = useState([]);
   const [shippingCost, setShippingCost] = useState(50); // Default to standard
@@ -30,10 +36,14 @@ export default function CheckoutPage() {
   const location = useLocation();
   const { authUser } = useAuth();
 
+  // Track if this is a Buy Now flow
+  const [isBuyNow, setIsBuyNow] = useState(false);
+
   useEffect(() => {
     // Check if this is a Buy Now flow
     const params = new URLSearchParams(location.search);
     if (params.get("buynow") === "1") {
+      setIsBuyNow(true);
       const buyNowProduct = JSON.parse(sessionStorage.getItem("buyNowProduct"));
       if (buyNowProduct) {
         setCartItems([
@@ -49,6 +59,7 @@ export default function CheckoutPage() {
         return;
       }
     }
+    setIsBuyNow(false);
     setCartItems(getCart());
   }, [location.search]);
 
@@ -69,13 +80,73 @@ export default function CheckoutPage() {
         phone: addr.phone || ""
       });
     }
-  // eslint-disable-next-line
+    // eslint-disable-next-line
   }, [selectedAddressIdx]);
 
   // Handle delivery method change
   const handleDeliveryChange = (method) => {
     setDeliveryMethod(method);
     setShippingCost(method === "express" ? 150 : 50);
+  };
+
+  // Quantity handlers for Buy Now
+  const incrementQty = (idx) => {
+    setCartItems(items =>
+      items.map((item, i) => {
+        if (i === idx) {
+          const updated = { ...item, quantity: item.quantity + 1 };
+          // If Buy Now, update sessionStorage
+          if (isBuyNow) {
+            sessionStorage.setItem("buyNowProduct", JSON.stringify(updated));
+          }
+          return updated;
+        }
+        return item;
+      })
+    );
+  };
+
+  const decrementQty = (idx) => {
+    setCartItems(items =>
+      items.map((item, i) => {
+        if (i === idx && item.quantity > 1) {
+          const updated = { ...item, quantity: item.quantity - 1 };
+          // If Buy Now, update sessionStorage
+          if (isBuyNow) {
+            sessionStorage.setItem("buyNowProduct", JSON.stringify(updated));
+          }
+          return updated;
+        }
+        return item;
+      })
+    );
+  };
+
+  // Save shipping address and order summary to localStorage
+  const saveOrderInfo = () => {
+    
+    localStorage.setItem(
+      "shippingAddress",
+      JSON.stringify(shippingFields)
+    );
+    
+    localStorage.setItem(
+      "orderSummary",
+      JSON.stringify(cartItems)
+    );
+   
+    cartItems.forEach(item => {
+      console.log("Cart Item:", {
+        id: item.id,
+        category: item.category,
+        image: item.image,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity
+      });
+    });
+    // Also log shipping address
+    console.log("Shipping Address:", shippingFields);
   };
 
   const renderStep = () => {
@@ -87,7 +158,10 @@ export default function CheckoutPage() {
             setValues={setShippingFields}
             deliveryMethod={deliveryMethod}
             onDeliveryChange={handleDeliveryChange}
-            onNext={() => setStep(2)}
+            onNext={() => {
+              saveOrderInfo(); // Save info before moving to payment
+              setStep(2);
+            }}
             onAddMore={() => navigate("/products")}
             savedAddresses={savedAddresses}
             selectedAddressIdx={selectedAddressIdx}
@@ -112,7 +186,14 @@ export default function CheckoutPage() {
         <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>{renderStep()}</div>
           <div>
-            <OrderSummary cartItems={cartItems} shippingCost={shippingCost} taxes={taxes} />
+            <OrderSummary
+              cartItems={cartItems}
+              shippingCost={shippingCost}
+              taxes={taxes}
+              isBuyNow={isBuyNow}
+              incrementQty={incrementQty}
+              decrementQty={decrementQty}
+            />
           </div>
         </div>
       </div>
@@ -266,7 +347,7 @@ function OrderConfirmation() {
 }
 
 // Order Summary Component (Right Column)
-function OrderSummary({ cartItems, shippingCost, taxes }) {
+function OrderSummary({ cartItems, shippingCost, taxes, isBuyNow, incrementQty, decrementQty }) {
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const total = subtotal + shippingCost + taxes;
 
@@ -278,10 +359,32 @@ function OrderSummary({ cartItems, shippingCost, taxes }) {
         <p className="text-gray-500 text-sm">No items in cart.</p>
       ) : (
         <ul className="divide-y">
-          {cartItems.map(item => (
-            <li key={item.id} className="py-2 flex justify-between text-sm">
-              <span>{item.name} <span className="text-xs text-gray-400">x{item.quantity}</span></span>
-              <span>₹{(item.price * item.quantity).toLocaleString()}</span>
+          {cartItems.map((item, idx) => (
+            <li key={item.id} className="py-2 flex justify-between items-center text-sm">
+              <span>
+                {item.name}{" "}
+                <span className="text-xs text-gray-400">x{item.quantity}</span>
+              </span>
+              <span className="flex items-center gap-2">
+                ₹{(item.price * item.quantity).toLocaleString()}
+                {/* Show quantity controls only for Buy Now */}
+                {isBuyNow && (
+                  <span className="flex items-center ml-3">
+                    <button
+                      type="button"
+                      className="bg-gray-200 px-2 rounded text-lg font-bold"
+                      onClick={() => decrementQty(idx)}
+                      disabled={item.quantity <= 1}
+                    >-</button>
+                    <span className="mx-2">{item.quantity}</span>
+                    <button
+                      type="button"
+                      className="bg-gray-200 px-2 rounded text-lg font-bold"
+                      onClick={() => incrementQty(idx)}
+                    >+</button>
+                  </span>
+                )}
+              </span>
             </li>
           ))}
         </ul>

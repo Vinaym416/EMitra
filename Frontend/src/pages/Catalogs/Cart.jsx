@@ -27,7 +27,7 @@ function Card({ product, children, className = '' }) {
   return (
     <div
       className={`bg-white hover:scale-105 transition-transform duration-300 shadow-xl rounded-2xl cursor-pointer ${className}`}
-      onClick={() => navigate(`/product/${product.id}`)}
+      onClick={() => navigate(`/products/${product.id}`)}
     >
       <img
         src={product.image}
@@ -244,7 +244,7 @@ export default function Cart() {
               </div>
             </div>
           )}
-          {/* Order Summary at the bottom */}
+        
          
         </div>
       </div>

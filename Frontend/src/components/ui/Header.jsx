@@ -43,6 +43,9 @@ export default function Header() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("authUser");
+    localStorage.removeItem("shippingAddress"); 
+    localStorage.removeItem("orderSummary");   
+    localStorage.removeItem("cartItems");     
     toast.success("Logged out successfully!");
     setTimeout(() => {
       window.location.reload();
