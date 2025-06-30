@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 export default function ProductDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -81,14 +82,13 @@ export default function ProductDetails() {
       <p className="text-pink-600 font-semibold text-lg mb-2">₹{product.price}</p>
       <p className="text-gray-700 mb-2">{product.description}</p>
       <p className="text-gray-500 text-sm mb-2">Category: {product.category}</p>
-      <a
-        href={product.sourceUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-blue-600 underline"
+      
+      <button
+        onClick={() => navigate("/products")}
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
       >
-        View on Store
-      </a>
+        View in Store
+      </button>
     </div>
   );
 }
