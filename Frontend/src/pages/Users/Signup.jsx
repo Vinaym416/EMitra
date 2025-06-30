@@ -3,6 +3,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { axiosInstance } from "../../lib/axios.js";
 import toast from "react-hot-toast";
+import { ShuffleIcon } from "lucide-react";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -11,8 +12,20 @@ export default function Signup() {
     email: "",
     phonenumber: "",
     password: "",
+    profilepic: getRandomAvatar(), // <-- Add default avatar
   });
   const [error, setError] = useState(null);
+
+  function getRandomAvatar() {
+    const idx = Math.floor(Math.random() * 100) + 1;
+    return `https://avatar.iran.liara.run/public/${idx}.png`;
+  }
+
+  const handleRandomProfilePic = () => {
+    const randomAvatar = getRandomAvatar();
+    setForm({ ...form, profilepic: randomAvatar });
+    
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -55,6 +68,7 @@ export default function Signup() {
         email: form.email,
         phonenumber: form.phonenumber,
         password: form.password,
+        profilepic: form.profilepic, // <-- Send avatar to backend
       };
       const res = await axiosInstance.post("/auth/register", payload);
       localStorage.setItem("token", res.data.token);
@@ -74,11 +88,35 @@ export default function Signup() {
           Create your Account
         </h2>
 
+        {/* Avatar Section */}
+        <div className="flex flex-col items-center mb-6">
+          {form.profilepic ? (
+            <img
+              src={form.profilepic}
+              alt="Profile"
+              className="w-24 h-24 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
+              <ShuffleIcon className="text-gray-500" />
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={handleRandomProfilePic}
+            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-xl mt-3"
+          >
+            <ShuffleIcon />
+            Avatar
+          </button>
+        </div>
+
         {error && (
           <p className="text-red-500 text-sm text-center mb-4">{error}</p>
         )}
 
         <form onSubmit={handleSignup} className="space-y-5">
+          {/* ...existing form fields... */}
           <div>
             <label className="block mb-1 text-sm text-gray-600">
               Username
@@ -94,7 +132,8 @@ export default function Signup() {
               autoComplete="username"
             />
           </div>
-
+          {/* ...rest of the fields remain unchanged... */}
+          {/* Email, Phone Number, Password */}
           <div>
             <label className="block mb-1 text-sm text-gray-600">
               Email
@@ -110,7 +149,6 @@ export default function Signup() {
               autoComplete="email"
             />
           </div>
-
           <div>
             <label className="block mb-1 text-sm text-gray-600">
               Phone Number
@@ -126,7 +164,6 @@ export default function Signup() {
               autoComplete="tel"
             />
           </div>
-
           <div>
             <label className="block mb-1 text-sm text-gray-600">
               Password

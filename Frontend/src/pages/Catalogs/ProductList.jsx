@@ -164,7 +164,7 @@ export default function ProductList() {
           </button>
         </div>
       )}
-      <div className="min-h-screen bg-gradient-to-b from-blue-100 to-blue-300 p-4 sm:p-6 pt-16 pb-16">
+      <div className="min-h-screen bg-gradient-to-b from-blue-100 to-blue-300 p-4 sm:p-6 pt-16 pb-16 ">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-gray-800">
             Explore Trending Products

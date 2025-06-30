@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema({
         required: false,
         unique: true
     },
+    profilepic:{
+        type:String,
+        required:false
+    },
     createdAt: {
         type: Date,
         default: Date.now

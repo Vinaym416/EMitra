@@ -9,7 +9,7 @@ const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 class AuthController {
     async register(req, res) {
-        const { username, email, password, phonenumber } = req.body;
+        const { username, email, password, phonenumber,profilepic } = req.body;
         if (!username || !email || !password || !phonenumber) {
             return res.status(400).json({ message: 'All fields are required' });
         }
@@ -28,13 +28,14 @@ class AuthController {
                 username,
                 email,
                 password: hashedPassword,
-                phonenumber
+                phonenumber,
+                profilepic
             });
             await user.save();
 
             const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '2h' });
 
-            res.status(201).json({ token, user: { id: user._id, username, email, phonenumber } });
+            res.status(201).json({ token, user: { id: user._id, username, email, phonenumber,profilepic } });
         } catch (err) {
             res.status(500).json({ message: 'Server error', error: err.message });
         }
@@ -62,7 +63,7 @@ class AuthController {
 
             const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '2h' });
 
-            res.status(200).json({ token, user: { id: user._id, username: user.username, email: user.email, phonenumber: user.phonenumber } });
+            res.status(200).json({ token, user: { id: user._id, username: user.username, email: user.email, phonenumber: user.phonenumber ,profilepic:user.profilepic} });
         } catch (err) {
             res.status(500).json({ message: 'Server error', error: err.message });
         }
@@ -77,7 +78,8 @@ class AuthController {
     }
 
     async getProfile(req, res) {
-        res.status(200).json({ user: req.user });
+        const { password, ...userWithoutPassword } = req.user.toObject ? req.user.toObject() : req.user;
+        res.status(200).json({ user: userWithoutPassword });
     }
 
     async googleLogin(req, res) {

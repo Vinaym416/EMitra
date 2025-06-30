@@ -7,6 +7,8 @@ import ProductDetails from "../pages/Catalogs/ProductDetails";
 import Cart from "../pages/Catalogs/Cart";
 import Checkout from "../pages/Payments/Checkout";
 import Payment from "../pages/Payments/Payment";
+import UserProfile from "../pages/Users/User.jsx";
+import Orders from "../pages/Users/Orders.jsx";
 
 
 
@@ -20,7 +22,8 @@ const appRoutes = [
   { path: "/products/:id", element: <ProductDetails /> },
 
   { path: "/payment", element: <Payment /> },
-
+   {path:"/user" ,element:<UserProfile/>},
+   {path:"/user/orders",element:<Orders/>},
   {path:"/cart", element: <Cart />}, 
 ];
 

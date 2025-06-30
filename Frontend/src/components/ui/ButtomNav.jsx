@@ -1,10 +1,14 @@
-import { ShoppingBag, ShoppingCart, User } from "lucide-react";
+import { ShoppingBag, ShoppingCart, User, List } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import React from "react";
 
 export default function BottomNav() {
   const location = useLocation();
   const path = location.pathname;
+
+  // Detect mobile view using window width
+  const isMobile = window.innerWidth < 768;
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t dark:border-gray-700 flex justify-around py-2 z-50 shadow-md">
       <TabIcon
@@ -19,12 +23,21 @@ export default function BottomNav() {
         active={path.startsWith("/cart")}
         label="Cart"
       />
-      <TabIcon
-        to="/profile"
-        icon={<User className="text-purple-500" size={22} />}
-        active={path.startsWith("/profile")}
-        label="Profile"
-      />
+      {isMobile ? (
+        <TabIcon
+          to="/user/orders"
+          icon={<List className="text-purple-500" size={22} />}
+          active={path.startsWith("/user/orders")}
+          label="Orders"
+        />
+      ) : (
+        <TabIcon
+          to="/user"
+          icon={<User className="text-purple-500" size={22} />}
+          active={path.startsWith("/user")}
+          label="You"
+        />
+      )}
     </nav>
   );
 }
