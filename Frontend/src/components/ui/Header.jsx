@@ -1,23 +1,58 @@
 import { Search, Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import React from "react";
 import toast from "react-hot-toast";
-
-const isLoggedIn = !!localStorage.getItem("token");
 
 export default function Header() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profilePic, setProfilePic] = useState(null);
+
+  // Get user profile pic from localStorage or fallback
+  useEffect(() => {
+    try {
+      const authUser = JSON.parse(localStorage.getItem("authUser"));
+      let pic = authUser?.profilepic;
+      if (typeof pic === "string" && pic.startsWith('"') && pic.endsWith('"')) {
+        pic = pic.slice(1, -1);
+      }
+      setProfilePic(pic || null);
+    } catch {
+      setProfilePic(null);
+    }
+  }, []);
+
+  // Reload page if view (mobile/web) changes
+  useEffect(() => {
+    function handleResize() {
+  
+      const isMobile = window.innerWidth < 768;
+      const lastIsMobile = sessionStorage.getItem("lastIsMobile") === "true";
+      if (isMobile !== lastIsMobile) {
+        sessionStorage.setItem("lastIsMobile", isMobile);
+        window.location.reload();
+      }
+    }
+    window.addEventListener("resize", handleResize);
+   
+    sessionStorage.setItem("lastIsMobile", window.innerWidth < 768);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("authUser");
+    localStorage.removeItem("shippingAddress"); 
+    localStorage.removeItem("orderSummary");   
+    localStorage.removeItem("cartItems");     
     toast.success("Logged out successfully!");
     setTimeout(() => {
       window.location.reload();
     }, 800);
   };
+
+  const isLoggedIn = !!localStorage.getItem("token");
 
   return (
     <>
@@ -43,12 +78,19 @@ export default function Header() {
           />
         </div>
         <div>
-          {isLoggedIn ? (
+          {isLoggedIn && profilePic ? (
+            <img
+              src={profilePic}
+              alt="Profile"
+              className="w-8 h-8 rounded-full object-cover border border-blue-500 cursor-pointer"
+              onClick={() => navigate("/user")}
+            />
+          ) : isLoggedIn ? (
             <button
               className="bg-blue-600 text-white px-3 py-1 rounded-md text-xs"
-              onClick={handleLogout}
+              onClick={() => navigate("/user")}
             >
-              Logout
+              Profile
             </button>
           ) : (
             <button
@@ -62,12 +104,12 @@ export default function Header() {
       </div>
 
       {/* Desktop Header */}
-      <header className="hidden md:flex flex-row items-center justify-between p-4 shadow-md bg-white dark:bg-zinc-900 rounded-2xl w-full">
+      <header className="hidden md:flex flex-row items-center justify-between p-4 shadow-md bg-white dark:bg-zinc-900  w-full">
         <h1
-          className="text-xl font-bold text-primary cursor-pointer"
+          className=" font-bold text-primary  bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm"
           onClick={() => navigate("/products")}
         >
-          eMitra Shop
+           Trendora
         </h1>
         <div className="flex flex-row items-center gap-4">
           <div className="flex items-center gap-2">
@@ -118,11 +160,7 @@ export default function Header() {
                   className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-center"
                   onClick={() => {
                     setSidebarOpen(false);
-                    toast.success("Logged out successfully!");
-                    setTimeout(() => {
-                      localStorage.removeItem("token");
-                      window.location.reload();
-                    }, 800);
+                    handleLogout();
                   }}
                 >
                   Logout

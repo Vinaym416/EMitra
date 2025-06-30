@@ -3,9 +3,17 @@ import { Star } from "lucide-react";
 import Badge from "./badge";
 import Button from "./button";
 
-export default function Card({ product, children, showActions = true }) {
+export default function Card({
+  product,
+  children,
+  showActions = true,
+  onBuyNow,
+  onAddToCart,
+  onRemoveFromCart,
+  isInCart,
+}) {
   return (
-      <div className="bg-white shadow-lg rounded-xl transition-transform duration-300 hover:scale-105">
+    <div className="bg-white shadow-lg rounded-xl transition-transform duration-300 hover:scale-105">
       <img
         src={product.imageUrl}
         alt={product.name}
@@ -36,15 +44,35 @@ export default function Card({ product, children, showActions = true }) {
           <div className="pt-2 space-y-2">
             <Button
               className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 rounded-md"
+              onClick={e => {
+                e.stopPropagation();
+                if (onBuyNow) onBuyNow();
+              }}
             >
               Buy Now
             </Button>
 
-            <Button
-              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm py-2 rounded-md border"
-            >
-              Add to Cart
-            </Button>
+            {isInCart ? (
+              <Button
+                className="w-full bg-red-100 hover:bg-red-200 text-red-700 text-sm py-2 rounded-md border"
+                onClick={e => {
+                  e.stopPropagation();
+                  if (onRemoveFromCart) onRemoveFromCart();
+                }}
+              >
+                Remove from Cart
+              </Button>
+            ) : (
+              <Button
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm py-2 rounded-md border"
+                onClick={e => {
+                  e.stopPropagation();
+                  if (onAddToCart) onAddToCart();
+                }}
+              >
+                Add to Cart
+              </Button>
+            )}
           </div>
         )}
 

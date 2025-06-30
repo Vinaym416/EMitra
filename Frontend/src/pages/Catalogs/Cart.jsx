@@ -27,7 +27,7 @@ function Card({ product, children, className = '' }) {
   return (
     <div
       className={`bg-white hover:scale-105 transition-transform duration-300 shadow-xl rounded-2xl cursor-pointer ${className}`}
-      onClick={() => navigate(`/product/${product.id}`)}
+      onClick={() => navigate(`/products/${product.id}`)}
     >
       <img
         src={product.image}
@@ -129,21 +129,28 @@ export default function Cart() {
         <span className="text-base sm:text-lg font-bold text-pink-600">
           ₹{subtotal.toLocaleString()}
         </span>
-      
-        <Button
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-3 py-1.5 text-sm shadow-sm"
-          onClick={() => {
-            if (!authUser || !authUser.id) {
-              toast.error("Please login to checkout.");
-              navigate("/login");
-              return;
-            }
-            navigate('/payment');
-          }}
-        >
-          Proceed to Checkout
-        </Button>
-
+        {cartItems.length > 0 ? (
+          <Button
+            className="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-3 py-1.5 text-sm shadow-sm"
+            onClick={() => {
+              if (!authUser || !authUser.id) {
+                toast.error("Please login to checkout.");
+                navigate("/login");
+                return;
+              }
+              navigate('/checkout');
+            }}
+          >
+            Proceed to Checkout
+          </Button>
+        ) : (
+          <Button
+            className="bg-blue-300 text-white rounded-md px-3 py-1.5 text-sm shadow-sm opacity-60 cursor-not-allowed"
+            disabled
+          >
+            Proceed to Checkout
+          </Button>
+        )}
       </div>
       <div className="min-h-screen bg-gradient-to-b from-blue-100 to-blue-300 p-3 sm:p-5 pb-32 pt-32">
         <div className="max-w-6xl mx-auto">
@@ -237,23 +244,8 @@ export default function Cart() {
               </div>
             </div>
           )}
-          {/* Order Summary at the bottom */}
-          {cartItems.length > 0 && (
-            <div className="max-w-md mx-auto mt-10 bg-white rounded-xl shadow-lg p-5 text-right">
-              <div className="flex justify-between mb-2 text-sm sm:text-base">
-                <span className="text-gray-700 font-medium">Subtotal</span>
-                <span className="text-gray-800">₹{subtotal.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between mb-2 text-sm sm:text-base">
-                <span className="text-gray-700 font-medium">Shipping</span>
-                <span className="text-gray-800">₹0</span>
-              </div>
-              <div className="flex justify-between border-t pt-3 mt-3 text-base sm:text-lg font-bold text-gray-900">
-                <span>Order Total</span>
-                <span className="text-pink-600">₹{subtotal.toLocaleString()}</span>
-              </div>
-            </div>
-          )}
+        
+         
         </div>
       </div>
       <BottomNav />
