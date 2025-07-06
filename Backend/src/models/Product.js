@@ -12,4 +12,6 @@ const productSchema = new mongoose.Schema({
   tags: [{ type: String }],
 });
 
+productSchema.index({ datePosted: -1 });
+
 module.exports = mongoose.model('Product', productSchema);

@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../../contexts/AuthContext";
 import Header from "../../components/ui/Header";
 import BottomNav from "../../components/ui/ButtomNav";
 import Card from "../../components/ui/card";
+import { axiosInstance } from "../../lib/axios"; // <-- Import axiosInstance
+
+const LIMIT = 10;
 
 // Helper to get cart from localStorage
 function getCart() {
@@ -27,29 +30,57 @@ function setCart(items, setCartState = null) {
 export default function ProductList() {
   const [cart, setCartState] = useState([]);
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [skip, setSkip] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [justAddedId, setJustAddedId] = useState(null);
   const [showGoToCart, setShowGoToCart] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { authUser } = useAuth();
 
+  // Infinite scroll loader
+  const loadProducts = useCallback(async () => {
+    if (!hasMore || loading) return;
+    setLoading(true);
+    try {
+      const res = await axiosInstance.get(
+        `/products?skip=${skip}&limit=${LIMIT}`
+      );
+      const data = res.data;
+      setProducts((prev) => {
+        const existingIds = new Set(prev.map((p) => p._id));
+        const newUnique = data.products.filter((p) => !existingIds.has(p._id));
+        return [...prev, ...newUnique];
+      });
+      setSkip((prev) => prev + LIMIT);
+      setHasMore(data.hasMore);
+    } catch (err) {
+      toast.error("Failed to load products");
+    } finally {
+      setLoading(false);
+    }
+  }, [skip, hasMore, loading]);
+
   // Fetch products on mount
   useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const res = await fetch("http://localhost:5001/products");
-        const data = await res.json();
-        setProducts(data);
-      } catch (err) {
-        toast.error("Failed to load products");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchProducts();
+    loadProducts();
     setCartState(getCart());
+    // eslint-disable-next-line
   }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + document.documentElement.scrollTop + 1 >=
+        document.documentElement.scrollHeight
+      ) {
+        loadProducts();
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loadProducts]);
 
   // Remove Buy Now item from cart when returning to /products
   useEffect(() => {
@@ -58,7 +89,7 @@ export default function ProductList() {
       const buyNowActive = sessionStorage.getItem("buyNowActive") === "1";
 
       if (buyNowActive && buyNowProduct) {
-        let cartItems = getCart().filter(item => item.id !== buyNowProduct.id);
+        let cartItems = getCart().filter((item) => item.id !== buyNowProduct.id);
         setCart(cartItems, setCartState);
         sessionStorage.removeItem("buyNowActive");
         sessionStorage.removeItem("buyNowProduct");
@@ -183,14 +214,17 @@ export default function ProductList() {
 
     setCart(cartItems, setCartState);
 
-    sessionStorage.setItem("buyNowProduct", JSON.stringify({
-      id: product._id,
-      name: product.name,
-      price: product.price,
-      quantity: 1,
-      category: product.category,
-      image: product.imageUrl,
-    }));
+    sessionStorage.setItem(
+      "buyNowProduct",
+      JSON.stringify({
+        id: product._id,
+        name: product.name,
+        price: product.price,
+        quantity: 1,
+        category: product.category,
+        image: product.imageUrl,
+      })
+    );
 
     sessionStorage.setItem("buyNowActive", "1");
 
@@ -220,38 +254,39 @@ export default function ProductList() {
           <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-gray-800">
             Explore Trending Products
           </h1>
-
-          {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {products.length === 0 && !loading ? (
+              <div className="col-span-full text-center text-gray-500">
+                No products found.
+              </div>
+            ) : (
+              products.map((product) => (
+                <div
+                  key={product._id}
+                  onClick={() => navigate(`/products/${product._id}`)}
+                  className="cursor-pointer"
+                >
+                  <Card
+                    product={product}
+                    showActions={true}
+                    onBuyNow={() => handleBuyNow(product)}
+                    onAddToCart={() => handleAddToCart(product)}
+                    onRemoveFromCart={() => handleRemoveFromCart(product)}
+                    isInCart={isInCart(product._id)}
+                    justAdded={justAddedId === product._id}
+                  />
+                </div>
+              ))
+            )}
+          </div>
+          {loading && (
             <div className="flex flex-col items-center py-10">
               <span className="mb-2 text-blue-700 font-semibold">Loading...</span>
               <span className="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></span>
             </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {products.length === 0 ? (
-                <div className="col-span-full text-center text-gray-500">
-                  No products found.
-                </div>
-              ) : (
-                products.map((product) => (
-                  <div
-                    key={product._id}
-                    onClick={() => navigate(`/products/${product._id}`)}
-                    className="cursor-pointer"
-                  >
-                    <Card
-                      product={product}
-                      showActions={true}
-                      onBuyNow={() => handleBuyNow(product)}
-                      onAddToCart={() => handleAddToCart(product)}
-                      onRemoveFromCart={() => handleRemoveFromCart(product)}
-                      isInCart={isInCart(product._id)}
-                      justAdded={justAddedId === product._id}
-                    />
-                  </div>
-                ))
-              )}
-            </div>
+          )}
+          {!hasMore && (
+            <p className="text-center text-gray-500 mt-4">No more products</p>
           )}
         </div>
       </div>

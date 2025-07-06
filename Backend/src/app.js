@@ -35,7 +35,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/catalog', catalogRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/notification', notificationRoutes);
-app.use('/products', productRoutes);
+app.use('/api/products', productRoutes);
 app.use('/api/orders', odersRoutes);
 
 // Error handling middleware

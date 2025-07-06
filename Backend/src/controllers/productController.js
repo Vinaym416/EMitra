@@ -1,10 +1,22 @@
 const Product = require('../models/Product');
 
-// Get all products from DB
 exports.getAllProducts = async (req, res) => {
+  const skip = parseInt(req.query.skip) || 0;
+  const limit = parseInt(req.query.limit) || 10;
+
   try {
-    const products = await Product.find();
-    res.status(200).json(products);
+    const products = await Product.find({})
+      .sort({ datePosted: -1 }) 
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Product.countDocuments();
+
+    res.status(200).json({
+      products,
+      total,
+      hasMore: skip + limit < total
+    });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch products' });
   }
