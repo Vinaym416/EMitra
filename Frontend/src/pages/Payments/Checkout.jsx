@@ -36,6 +36,10 @@ export default function CheckoutPage() {
   const location = useLocation();
   const { authUser } = useAuth();
 
+  const [locLoading, setLocLoading] = useState(false);
+  const [locError, setLocError] = useState("");
+  const [locationUsed, setLocationUsed] = useState(false);
+
   // Track if this is a Buy Now flow
   const [isBuyNow, setIsBuyNow] = useState(false);
 
@@ -166,6 +170,10 @@ export default function CheckoutPage() {
             savedAddresses={savedAddresses}
             selectedAddressIdx={selectedAddressIdx}
             setSelectedAddressIdx={setSelectedAddressIdx}
+            locLoading={locLoading}
+            locError={locError}
+            handleUseLocation={handleUseLocation}
+            locationUsed={locationUsed}
           />
         );
       case 2:
@@ -177,6 +185,59 @@ export default function CheckoutPage() {
       default:
         return null;
     }
+  };
+
+  const handleUseLocation = async () => {
+    setLocError("");
+    setLocLoading(true);
+    if (!navigator.geolocation) {
+      setLocError("Geolocation is not supported by your browser.");
+      setLocLoading(false);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=en`,
+            {
+              headers: {
+                "User-Agent": "EMitra/1.0 (your@email.com)",
+              },
+            }
+          );
+          if (!res.ok) throw new Error("Failed to fetch location");
+          const data = await res.json();
+          setShippingFields((v) => ({
+            ...v,
+            address: data.address.road
+              ? `${data.address.road}${data.address.house_number ? " " + data.address.house_number : ""}`
+              : data.display_name || "",
+            cityStateZip: [
+              data.address.city || data.address.town || data.address.village || "",
+              data.address.state || "",
+              data.address.postcode || "",
+            ]
+              .filter(Boolean)
+              .join(", "),
+            // Optionally, store lat/lon for backend
+            latitude: lat,
+            longitude: lon,
+          }));
+          setLocError("");
+          setLocationUsed(true);
+        } catch (err) {
+          setLocError("Could not fetch address from location.");
+        }
+        setLocLoading(false);
+      },
+      (err) => {
+        setLocError("Permission denied or unavailable.");
+        setLocLoading(false);
+      }
+    );
   };
 
   return (
@@ -212,7 +273,11 @@ function ShippingAndDeliveryForm({
   onAddMore,
   savedAddresses = [],
   selectedAddressIdx,
-  setSelectedAddressIdx
+  setSelectedAddressIdx,
+  locLoading,
+  locError,
+  handleUseLocation,
+  locationUsed
 }) {
   return (
     <form
@@ -287,6 +352,17 @@ function ShippingAndDeliveryForm({
             value={values.phone}
             onChange={e => setValues(v => ({ ...v, phone: e.target.value }))}
           />
+          {!locationUsed && (
+            <button
+              type="button"
+              className="mb-2 px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              onClick={handleUseLocation}
+              disabled={locLoading}
+            >
+              {locLoading ? "Detecting..." : "Use Present Location (enter manually if not accurate)"}
+            </button>
+          )}
+          {locError && <div className="text-red-500 text-xs mb-2">{locError}</div>}
         </>
       )}
 
