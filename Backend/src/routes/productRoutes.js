@@ -8,6 +8,8 @@ router.get('/', ProductController.getAllProducts);
 // Get product by ID
 router.get('/:id', ProductController.getProductById);
 
+router.put('/:id', ProductController.updateProduct);
+
 // Add a product (no auth)
 router.post('/add', ProductController.addProduct);
 

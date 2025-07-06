@@ -8,7 +8,8 @@ const productSchema = new mongoose.Schema({
   sourceUrl: { type: String },
   description: { type: String },
   category: { type: String },
-  store: { type: String }, // e.g., supplier/store name
+  store: { type: String },
+  tags: [{ type: String }],
 });
 
 module.exports = mongoose.model('Product', productSchema);
