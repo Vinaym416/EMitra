@@ -83,12 +83,24 @@ export default function Header() {
               src={profilePic}
               alt="Profile"
               className="w-8 h-8 rounded-full object-cover border border-blue-500 cursor-pointer"
-              onClick={() => navigate("/user")}
+              onClick={() => {
+                if (window.location.pathname === "/user") {
+                  navigate("/products");
+                } else {
+                  navigate("/user");
+                }
+              }}
             />
           ) : isLoggedIn ? (
             <button
               className="bg-blue-600 text-white px-3 py-1 rounded-md text-xs"
-              onClick={() => navigate("/user")}
+              onClick={() => {
+                if (window.location.pathname === "/user") {
+                  navigate("/products");
+                } else {
+                  navigate("/user");
+                }
+              }}
             >
               Profile
             </button>
