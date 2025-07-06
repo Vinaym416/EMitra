@@ -1,16 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-<<<<<<< HEAD
-=======
 import toast from "react-hot-toast";
 import { useAuth } from "../../contexts/AuthContext";
 import Header from "../../components/ui/Header";
 import BottomNav from "../../components/ui/ButtomNav";
->>>>>>> 83bbec17ab9bcb46c1c6db61abe63fc81b6b13f9
 
 export default function ProductDetails() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -173,46 +169,46 @@ export default function ProductDetails() {
     <>
       <Header />
       <div className="min-h-screen bg-gradient-to-b from-blue-100 to-blue-300 pt-16 pb-20 px-2">
-    <div className="max-w-xl mx-auto p-6 bg-white rounded-xl shadow mt-8">
-      <div
-        className="relative w-full h-64 mb-4"
-        onMouseEnter={() => setShowLens(true)}
-        onMouseLeave={() => setShowLens(false)}
-        onMouseMove={handleMouseMove}
-        style={{ width: "100%", height: "256px" }}
-      >
-        <img
-          ref={imgRef}
-          src={product.imageUrl}
-          alt={product.name}
-          className="w-full h-64 object-cover rounded-lg"
-          style={{ display: "block" }}
-        />
-        {showLens && (
+        <div className="max-w-xl mx-auto p-6 bg-white rounded-xl shadow mt-8">
           <div
-            style={{
-              position: "absolute",
-              pointerEvents: "none",
-              left: lensPos.x - lensSize / 2,
-              top: lensPos.y - lensSize / 2,
-              width: lensSize,
-              height: lensSize,
-              borderRadius: "50%",
-              border: "2px solid #fff",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-              backgroundImage: `url(${product.imageUrl})`,
-              backgroundRepeat: "no-repeat",
-              backgroundSize: `${imgRef.current?.offsetWidth * zoom}px ${imgRef.current?.offsetHeight * zoom}px`,
-              backgroundPosition: `-${lensPos.x * zoom - lensSize / 2}px -${lensPos.y * zoom - lensSize / 2}px`,
-              zIndex: 10,
-            }}
-          />
-        )}
-      </div>
-      <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
-      <p className="text-pink-600 font-semibold text-lg mb-2">₹{product.price}</p>
-      <p className="text-gray-700 mb-2">{product.description}</p>
-      <p className="text-gray-500 text-sm mb-2">Category: {product.category}</p>
+            className="relative w-full h-64 mb-4"
+            onMouseEnter={() => setShowLens(true)}
+            onMouseLeave={() => setShowLens(false)}
+            onMouseMove={handleMouseMove}
+            style={{ width: "100%", height: "256px" }}
+          >
+            <img
+              ref={imgRef}
+              src={product.imageUrl}
+              alt={product.name}
+              className="w-full h-64 object-cover rounded-lg"
+              style={{ display: "block" }}
+            />
+            {showLens && (
+              <div
+                style={{
+                  position: "absolute",
+                  pointerEvents: "none",
+                  left: lensPos.x - lensSize / 2,
+                  top: lensPos.y - lensSize / 2,
+                  width: lensSize,
+                  height: lensSize,
+                  borderRadius: "50%",
+                  border: "2px solid #fff",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                  backgroundImage: `url(${product.imageUrl})`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundSize: `${imgRef.current?.offsetWidth * zoom}px ${imgRef.current?.offsetHeight * zoom}px`,
+                  backgroundPosition: `-${lensPos.x * zoom - lensSize / 2}px -${lensPos.y * zoom - lensSize / 2}px`,
+                  zIndex: 10,
+                }}
+              />
+            )}
+          </div>
+          <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
+          <p className="text-pink-600 font-semibold text-lg mb-2">₹{product.price}</p>
+          <p className="text-gray-700 mb-2">{product.description}</p>
+          <p className="text-gray-500 text-sm mb-2">Category: {product.category}</p>
           <a
             href={product.sourceUrl}
             target="_blank"
@@ -254,22 +250,7 @@ export default function ProductDetails() {
           </div>
         </div>
       </div>
-<<<<<<< HEAD
-      <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
-      <p className="text-pink-600 font-semibold text-lg mb-2">₹{product.price}</p>
-      <p className="text-gray-700 mb-2">{product.description}</p>
-      <p className="text-gray-500 text-sm mb-2">Category: {product.category}</p>
-      
-      <button
-        onClick={() => navigate("/products")}
-        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-      >
-        View in Store
-      </button>
-    </div>
-=======
       <BottomNav />
     </>
->>>>>>> 83bbec17ab9bcb46c1c6db61abe63fc81b6b13f9
   );
 }
