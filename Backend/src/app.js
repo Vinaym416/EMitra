@@ -7,6 +7,7 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const productRoutes = require('./routes/productRoutes');
 const  connectDB  = require('./config/db.js');
 const authMiddleware = require('./middleware/authMiddleware');
+const odersRoutes = require('./routes/ordersRoutes');
 const cors = require('cors');
 
 const app = express();
@@ -35,6 +36,8 @@ app.use('/api/catalog', catalogRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/notification', notificationRoutes);
 app.use('/products', productRoutes);
+app.use('/api/orders', odersRoutes);
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     res.status(err.status || 500).json({ message: err.message });
