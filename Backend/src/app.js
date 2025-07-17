@@ -31,12 +31,12 @@ app.use(
 connectDB();
 
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/catalog', catalogRoutes);
-app.use('/api/payment', paymentRoutes);
-app.use('/api/notification', notificationRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/orders', odersRoutes);
+app.use('/auth', authRoutes);
+app.use('/catalog', catalogRoutes);
+app.use('/payment', paymentRoutes);
+app.use('/notification', notificationRoutes);
+app.use('/products', productRoutes);
+app.use('/orders', odersRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

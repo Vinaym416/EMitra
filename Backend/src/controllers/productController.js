@@ -36,7 +36,7 @@ exports.getProductById = async (req, res) => {
 
 // Add a product to DB
 exports.addProduct = async (req, res) => {
-  const { name, price, imageUrl, sourceUrl, description, category, store } = req.body;
+  const { name, price, imageUrl, sourceUrl, description, category, store,tags } = req.body;
   try {
     const product = new Product({
       name,

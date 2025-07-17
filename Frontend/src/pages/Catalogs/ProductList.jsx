@@ -27,6 +27,25 @@ function setCart(items, setCartState = null) {
   }
 }
 
+function getDateLabel(dateStr) {
+  const date = new Date(dateStr);
+  const today = new Date();
+  const diff = Math.floor((today - date) / (1000 * 60 * 60 * 24));
+  if (diff === 0) return "Today";
+  if (diff === 1) return "Yesterday";
+  return date.toLocaleDateString();
+}
+
+function groupProductsByDate(products) {
+  const groups = {};
+  products.forEach((product) => {
+    const label = getDateLabel(product.datePosted);
+    if (!groups[label]) groups[label] = [];
+    groups[label].push(product);
+  });
+  return groups;
+}
+
 export default function ProductList() {
   const [cart, setCartState] = useState([]);
   const [products, setProducts] = useState([]);
@@ -35,9 +54,16 @@ export default function ProductList() {
   const [loading, setLoading] = useState(false);
   const [justAddedId, setJustAddedId] = useState(null);
   const [showGoToCart, setShowGoToCart] = useState(false);
+  const [daysToShow, setDaysToShow] = useState(5);
   const navigate = useNavigate();
   const location = useLocation();
   const { authUser } = useAuth();
+
+  const grouped = groupProductsByDate(products);
+  const dateLabels = Object.keys(grouped)
+    .sort((a, b) => new Date(b) - new Date(a)); // newest first
+
+  const visibleLabels = dateLabels.slice(0, daysToShow);
 
   // Infinite scroll loader
   const loadProducts = useCallback(async () => {
@@ -75,12 +101,16 @@ export default function ProductList() {
         window.innerHeight + document.documentElement.scrollTop + 1 >=
         document.documentElement.scrollHeight
       ) {
-        loadProducts();
+        if (daysToShow < dateLabels.length) {
+          setDaysToShow((prev) => prev + 2); // load 2 more days
+        } else {
+          loadProducts(); // load more products from backend if available
+        }
       }
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [loadProducts]);
+  }, [daysToShow, dateLabels.length, loadProducts]);
 
   // Remove Buy Now item from cart when returning to /products
   useEffect(() => {
@@ -254,31 +284,30 @@ export default function ProductList() {
           <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-gray-800">
             Explore Trending Products
           </h1>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {products.length === 0 && !loading ? (
-              <div className="col-span-full text-center text-gray-500">
-                No products found.
+          {visibleLabels.map((label) => (
+            <div key={label} className="mb-8">
+              <h2 className="text-xl font-bold mb-3 text-blue-700">{label}</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {grouped[label].map((product) => (
+                  <div
+                    key={product._id}
+                    onClick={() => navigate(`/products/${product._id}`)}
+                    className="cursor-pointer"
+                  >
+                    <Card
+                      product={product}
+                      showActions={true}
+                      onBuyNow={() => handleBuyNow(product)}
+                      onAddToCart={() => handleAddToCart(product)}
+                      onRemoveFromCart={() => handleRemoveFromCart(product)}
+                      isInCart={isInCart(product._id)}
+                      justAdded={justAddedId === product._id}
+                    />
+                  </div>
+                ))}
               </div>
-            ) : (
-              products.map((product) => (
-                <div
-                  key={product._id}
-                  onClick={() => navigate(`/products/${product._id}`)}
-                  className="cursor-pointer"
-                >
-                  <Card
-                    product={product}
-                    showActions={true}
-                    onBuyNow={() => handleBuyNow(product)}
-                    onAddToCart={() => handleAddToCart(product)}
-                    onRemoveFromCart={() => handleRemoveFromCart(product)}
-                    isInCart={isInCart(product._id)}
-                    justAdded={justAddedId === product._id}
-                  />
-                </div>
-              ))
-            )}
-          </div>
+            </div>
+          ))}
           {loading && (
             <div className="flex flex-col items-center py-10">
               <span className="mb-2 text-blue-700 font-semibold">Loading...</span>
